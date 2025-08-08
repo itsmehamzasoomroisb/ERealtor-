@@ -1,0 +1,484 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>eRealtor Dashboard</title>
+  <style>
+    /* Color palette */
+    :root {
+      --primary-color: #1D4E89;
+      --primary-hover: #1761A0;
+      --background-light: #F9FAFB;
+      --background-section: #E5E7EB;
+      --text-dark: #2D3748;
+      --text-medium: #4A5568;
+      --accent-color: #38B2AC;
+      --white: #fff;
+    }
+
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-light);
+      color: var(--text-dark);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: var(--accent-color);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--primary-color);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      font-weight: 600;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 40px;
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+    }
+
+    .sidebar a {
+      color: var(--white);
+      margin: 12px 0;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 1rem;
+      display: block;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar a.active,
+    .sidebar a:hover {
+      background: var(--accent-color);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    /* Header */
+    .header {
+      height: 60px;
+      background: var(--primary-color);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 20px;
+      position: fixed;
+      top: 0;
+      left: 220px;
+      right: 0;
+      z-index: 10;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    /* Profile dropdown */
+    .profile {
+      cursor: pointer;
+      position: relative;
+      font-size: 1rem;
+    }
+
+    .profile:hover .dropdown {
+      display: block;
+    }
+
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 40px;
+      background: var(--white);
+      color: var(--text-dark);
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 140px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      font-weight: 500;
+      z-index: 20;
+    }
+
+    .dropdown a {
+      padding: 12px 15px;
+      display: block;
+      color: var(--text-dark);
+      transition: background-color 0.3s ease;
+    }
+
+    .dropdown a:hover {
+      background: var(--background-section);
+    }
+
+    /* Content */
+    .content {
+      margin-left: 220px;
+      padding: 80px 30px 30px 30px;
+      flex-grow: 1;
+      background-color: var(--background-light);
+      overflow-y: auto;
+      height: 100vh;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Sections */
+    .section {
+      background: var(--white);
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+
+    .section h2 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* Cards container */
+    .cards {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    /* Individual card */
+    .card {
+      background: var(--background-section);
+      padding: 30px 20px;
+      border-radius: 10px;
+      flex: 1 1 200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-medium);
+      transition: background-color 0.3s ease;
+      cursor: default;
+    }
+
+    .card:hover {
+      background-color: var(--accent-color);
+      color: var(--white);
+    }
+
+    .card h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.25rem;
+    }
+
+    .card p {
+      font-size: 2.5rem;
+      margin: 0;
+      font-weight: 800;
+      color: inherit;
+      letter-spacing: 1.5px;
+    }
+
+    /* Hide all admin and team sections by default */
+    .admin-section, .team-section {
+      display: none;
+    }
+
+    /* Show active section */
+    .active-section {
+      display: block;
+    }
+
+    /* List item styling */
+    .list-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 1rem;
+      color: var(--text-medium);
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Actions buttons */
+    .actions button {
+      background: var(--primary-color);
+      color: var(--white);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    .actions button:hover {
+      background-color: var(--accent-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        height: auto;
+      }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 5px;
+      }
+      .sidebar h2 {
+        margin: 0 20px 0 10px;
+        font-size: 1.25rem;
+        flex: 0 0 auto;
+      }
+      .sidebar a {
+        margin: 0 10px;
+        padding: 10px 15px;
+        flex: 0 0 auto;
+        font-size: 0.9rem;
+      }
+      .header {
+        position: static;
+        left: 0;
+        top: 0;
+        margin-top: 0;
+        justify-content: center;
+      }
+      .content {
+        margin-left: 0;
+        padding: 20px 15px;
+        height: auto;
+      }
+      .cards {
+        flex-direction: column;
+      }
+      .card {
+        flex: none;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar-admin">
+    <h2>eRealtor Admin</h2>
+    <a href="#" data-section="dashboard" class="active admin-link" aria-current="page">Dashboard</a>
+    <a href="#" data-section="users" class="admin-link">Users Management</a>
+    <a href="#" data-section="contacts" class="admin-link">Contacts Management</a>
+    <a href="#" data-section="messages" class="admin-link">Messages</a>
+    <a href="#" data-section="settings" class="admin-link">Settings</a>
+  </nav>
+
+  <nav class="sidebar" id="sidebar-team" style="display:none;">
+    <h2>eRealtor Team</h2>
+    <a href="#" data-section="dashboard" class="active team-link" aria-current="page">Dashboard</a>
+    <a href="#" data-section="contacts" class="team-link">My Contacts</a>
+    <a href="#" data-section="messages" class="team-link">Messages</a>
+    <a href="#" data-section="settings" class="team-link">Settings</a>
+  </nav>
+
+  <!-- Header -->
+  <header class="header" role="banner">
+    <div class="profile" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
+      Hamza &#x25BC;
+      <div class="dropdown" role="menu" aria-label="User menu options">
+        <a href="#" role="menuitem">Settings</a>
+        <a href="#" role="menuitem">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content" id="content-admin" role="main" tabindex="-1">
+
+    <!-- Admin Sections -->
+    <section id="admin-dashboard" class="admin-section active-section" aria-label="Admin dashboard overview">
+      <div class="cards">
+        <div class="card">
+          <h3>Total Users</h3>
+          <p>45</p>
+        </div>
+        <div class="card">
+          <h3>Total Contacts</h3>
+          <p>1200</p>
+        </div>
+        <div class="card">
+          <h3>Messages Sent Today</h3>
+          <p>320</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Recent Activity</h2>
+        <div class="list-item">User A sent a message to Contact X</div>
+        <div class="list-item">User B sent a message to Contact Y</div>
+        <div class="list-item">User C added a new contact</div>
+      </div>
+
+      <div class="actions" role="region" aria-label="Admin quick actions">
+        <button>Add New User</button>
+        <button>Add New Contact</button>
+      </div>
+    </section>
+
+    <section id="admin-users" class="admin-section" aria-label="Users management">
+      <div class="section">
+        <h2>Users Management</h2>
+        <p>Manage users here.</p>
+      </div>
+    </section>
+
+    <section id="admin-contacts" class="admin-section" aria-label="Contacts management">
+      <div class="section">
+        <h2>Contacts Management</h2>
+        <p>Manage all contacts here.</p>
+      </div>
+    </section>
+
+    <section id="admin-messages" class="admin-section" aria-label="Messages">
+      <div class="section">
+        <h2>Messages</h2>
+        <p>View and send messages.</p>
+      </div>
+    </section>
+
+    <section id="admin-settings" class="admin-section" aria-label="Settings">
+      <div class="section">
+        <h2>Settings</h2>
+        <p>Admin settings here.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <main class="content" id="content-team" role="main" tabindex="-1" style="display:none;">
+
+    <!-- Team Sections -->
+    <section id="team-dashboard" class="team-section active-section" aria-label="Team dashboard overview">
+      <div class="cards">
+        <div class="card">
+          <h3>My Contacts</h3>
+          <p>150</p>
+        </div>
+        <div class="card">
+          <h3>Messages Sent Today</h3>
+          <p>30</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Recent Activity</h2>
+        <div class="list-item">You sent a message to Contact A</div>
+        <div class="list-item">You added a new contact</div>
+      </div>
+
+      <div class="actions" role="region" aria-label="Team quick actions">
+        <button>Add New Contact</button>
+        <button>Send Message</button>
+      </div>
+    </section>
+
+    <section id="team-contacts" class="team-section" aria-label="Contacts management">
+      <div class="section">
+        <h2>My Contacts</h2>
+        <p>Manage your contacts here.</p>
+      </div>
+    </section>
+
+    <section id="team-messages" class="team-section" aria-label="Messages">
+      <div class="section">
+        <h2>Messages</h2>
+        <p>View and send messages.</p>
+      </div>
+    </section>
+
+    <section id="team-settings" class="team-section" aria-label="Settings">
+      <div class="section">
+        <h2>Settings</h2>
+        <p>Your settings here.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // User role simulation
+    const userRole = 'admin'; // Change to 'team' to test team view
+
+    const sidebarAdmin = document.getElementById('sidebar-admin');
+    const contentAdmin = document.getElementById('content-admin');
+    const sidebarTeam = document.getElementById('sidebar-team');
+    const contentTeam = document.getElementById('content-team');
+
+    if(userRole === 'admin') {
+      sidebarAdmin.style.display = 'flex';
+      contentAdmin.style.display = 'block';
+      sidebarTeam.style.display = 'none';
+      contentTeam.style.display = 'none';
+    } else {
+      sidebarAdmin.style.display = 'none';
+      contentAdmin.style.display = 'none';
+      sidebarTeam.style.display = 'flex';
+      contentTeam.style.display = 'block';
+    }
+
+    // Navigation links handlers
+    function setupNavigation(role) {
+      const linkClass = role === 'admin' ? '.admin-link' : '.team-link';
+      const sectionPrefix = role === 'admin' ? 'admin-' : 'team-';
+
+      const links = document.querySelectorAll(linkClass);
+      links.forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          // Remove active class from all links
+          links.forEach(l => l.classList.remove('active'));
+          // Add active class to clicked link
+          link.classList.add('active');
+
+          // Hide all sections
+          document.querySelectorAll(`.${role}-section`).forEach(section => {
+            section.classList.remove('active-section');
+          });
+
+          // Show selected section
+          const sectionId = sectionPrefix + link.getAttribute('data-section');
+          document.getElementById(sectionId).classList.add('active-section');
+        });
+      });
+    }
+
+    setupNavigation(userRole);
+  </script>
+
+</body>
+        </html>
+        
